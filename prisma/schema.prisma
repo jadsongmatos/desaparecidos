@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_PRISMA")
+}
+
+model pessoa {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(254)
+  gender      Boolean
+  nation      String   @db.Char(2)
+  eyes        Int      @default(5125166)
+  create_time DateTime @default(now())
+  update_time DateTime @updatedAt
+
+  location_history    location_history[]
+  pessoas_on_contacts pessoas_on_contacts[]
+  comments            contents[]
+
+  hair_info       hair_info[]
+  marks_info      marks_info[]
+  deficiency_info deficiency_info[]
+  clothing_info   clothing_info[]
+  tattoo_info     tattoo_info[]
+  weight_info     weight_info[]
+  height_info     height_info[]
+  birthday_info   birthday_info[]
+}
+
+model birthday_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  day         Int?     @db.SmallInt
+  month       Int?     @db.SmallInt
+  year        Int?     @db.SmallInt
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model hair_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  description String   @db.VarChar(254)
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model marks_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  description String   @default("Não possui") @db.VarChar(512)
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model deficiency_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  description String   @default("Não possui") @db.VarChar(512)
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model clothing_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  description String?  @db.VarChar(512)
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model tattoo_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  amount      Int      @default(0) @db.SmallInt
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model weight_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  kg          Int      @default(62) @db.SmallInt
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model height_info {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  cm          Int      @default(170) @db.SmallInt
+  trust       Int      @default(0) @db.SmallInt
+  create_time DateTime @default(now())
+
+  @@index([pessoa_id])
+}
+
+model location_history {
+  id          Int      @id @default(autoincrement())
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+  location_id Int
+  location    location @relation(fields: [location_id], references: [id])
+  visited_at  DateTime
+
+  @@index([pessoa_id])
+  @@index([location_id])
+}
+
+model location {
+  id        Int     @id @default(autoincrement())
+  latitude  Decimal @db.Decimal
+  longitude Decimal @db.Decimal
+  city      Int
+  state     Int
+  nation    String  @db.Char(2)
+
+  location_history location_history[]
+  contact          contact[]
+}
+
+model contents {
+  id          String   @id @default(uuid())
+  content     String   @db.Text
+  create_time DateTime @default(now())
+  update_time DateTime @updatedAt
+  pessoa_id   String
+  pessoa      pessoa   @relation(fields: [pessoa_id], references: [id])
+
+  @@index([pessoa_id])
+}
+
+model contact {
+  email  String   @id @db.VarChar(254)
+  tel    String?  @db.VarChar(254)
+  name   String   @db.VarChar(254)
+  gender Boolean?
+
+  location_id Int
+  location    location @relation(fields: [location_id], references: [id])
+
+  pessoas_on_contacts pessoas_on_contacts[]
+
+  @@index([location_id])
+}
+
+model pessoas_on_contacts {
+  pessoa     pessoa  @relation(fields: [pessoa_id], references: [id])
+  pessoa_id  String
+  contact    contact @relation(fields: [contact_id], references: [email])
+  contact_id String
+
+  @@id([pessoa_id, contact_id])
+}
