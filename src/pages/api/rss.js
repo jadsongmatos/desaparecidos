@@ -3,7 +3,7 @@ import { Feed } from "feed";
 const url = `http://${
   process.env.NEXT_PUBLIC_BASE_URL
     ? process.env.NEXT_PUBLIC_BASE_URL
-    : "desapareicdos.vercel.app"
+    : "desaparecidos2.vercel.app"
 }`;
 
 export default async function handler(req, res) {
@@ -43,11 +43,11 @@ export default async function handler(req, res) {
         title: item.name,
         id: item.id,
         link: `${url}/desaparecidos/1?name=${item.name}`,
-        description: `Nome: ${item.name}. Nascimento: ${birthday}. Nacionalidade: ${nationality}. Última localização conhecida: ${city}${
+        description: `Nome: ${item.name}. Nascimento: ${birthday}. Etnia: ${nationality}. Última localização conhecida: ${city}${
           neighborhood !== "Bairro não informado" ? `, bairro ${neighborhood}` : ""
         }.`,
-        date: new Date(item.birthday || Date.now()), // Garante que exista uma data válida
-        image: item.main_photo || `${url}/images/placeholder.png`, // Placeholder se imagem não existir
+        date: new Date(item.birthday || Date.now()),
+        image: item.main_photo || `${url}/icons8-pessoa-do-sexo-masculino-100.png`,
       });
     });
 

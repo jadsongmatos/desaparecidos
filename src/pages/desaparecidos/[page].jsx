@@ -254,7 +254,7 @@ export default function DesaparecidosPage({ data, meta }) {
               <Link
                 className="page-link"
                 href={{
-                  pathname: `/pessoas/${currentPage + 1}`,
+                  pathname: `/desaparecidos/${currentPage + 1}`,
                   query: router.query,
                 }}
                 aria-label="Next"
@@ -286,7 +286,7 @@ export async function getServerSideProps(context) {
     `http://${
       process.env.NEXT_PUBLIC_BASE_URL
         ? process.env.NEXT_PUBLIC_BASE_URL
-        : "desapareicdos.vercel.app"
+        : "desaparecidos2.vercel.app"
     }/api/desaparecidos?${queryParams.toString()}`
   );
 

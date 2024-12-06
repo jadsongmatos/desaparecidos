@@ -1,69 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import { RiUserSearchLine } from "react-icons/ri";
+import Link from "next/link";
 
 function LocalizacaoNavBar() {
-  const [estados, setEstados] = useState([]);
-  const [cidades, setCidades] = useState([]);
-  const [estadoSelecionado, setEstadoSelecionado] = useState('');
-  const [cidadeSelecionada, setCidadeSelecionada] = useState('');
-  const [nome, setNome] = useState('');
-
-  useEffect(() => {
-    fetchEstados();
-  }, []);
-
-  useEffect(() => {
-    if (estadoSelecionado) {
-      fetchCidadesPorEstado(estadoSelecionado);
-    } else {
-      setCidades([]);
-    }
-  }, [estadoSelecionado]);
-
-  const fetchEstados = async () => {
-    const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
-    const data = await response.json();
-    setEstados(data);
-  };
-
-  const fetchCidadesPorEstado = async (estadoId) => {
-    const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoId}/municipios?orderBy=nome`);
-    const data = await response.json();
-    setCidades(data);
-  };
-
-  const handlePesquisa = (e) => {
-    e.preventDefault();
-    // Implemente a lógica de pesquisa aqui
-    console.log("Pesquisar:", { nome, estadoSelecionado });
-  };
-
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light justify-content-center">
-      <form className="d-flex align-items-center" onSubmit={handlePesquisa}>
-        <input className="form-control me-2" type="search" placeholder="Nome" aria-label="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
-        <select className="form-select me-2" onChange={(e) => setEstadoSelecionado(e.target.value)} value={estadoSelecionado}>
-          <option value="">Estado</option>
-          {estados.map((estado) => (
-            <option key={estado.id} value={estado.id}>{estado.nome}</option>
-          ))}
-        </select>
-        <select
-          className="form-select me-2"
-          value={cidadeSelecionada}
-          onChange={(e) => setCidadeSelecionada(e.target.value)}
-          disabled={!estadoSelecionado}
-        >
-          <option value="">Cidade</option>
-          {cidades.map((cidade) => (
-            <option key={cidade.id} value={cidade.id}>{cidade.nome}</option>
-          ))}
-        </select>
-        <button className="btn btn-primary" type="submit" style={{ display: 'inline-flex', alignItems: 'center' }}>
-          Pesquisar <RiUserSearchLine size={20} style={{ marginLeft: '5px' }} />
-        </button>
-      </form>
-    </nav>
+    <>
+      <header className="text-center py-5 bg-primary text-white">
+        <h1>Ajude a Encontrar Pessoas Desaparecidas</h1>
+        <p>
+          Milhares de pessoas desaparecem todos os anos no Brasil. Sua ajuda
+          pode fazer a diferença.
+        </p>
+      </header>
+
+      <section className="container my-5">
+        <h2>O que é este site?</h2>
+        <ul>
+          <li>
+            Plataforma para buscar e encontrar informações sobre pessoas
+            desaparecidas no Brasil.
+          </li>
+          <li>Conecte-se com informações atualizadas e participe da busca.</li>
+        </ul>
+      </section>
+
+      <section className="text-center my-5">
+        <Link href="/desaparecidos/1" className="btn btn-primary btn-lg">
+          Ir para a página de desaparecidos
+        </Link>
+      </section>
+
+      <footer className="bg-light py-3">
+        <div className="container">
+          <div className="row">
+            <div className="col-md-6">
+              <p>
+                Informações sobre a coleta e uso de dados de desaparecidos,
+                incluindo fontes externas e como são atualizados.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }
 
