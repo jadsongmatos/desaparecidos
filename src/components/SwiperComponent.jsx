@@ -32,6 +32,7 @@ const SwiperComponent = ({ selectedPeople }) => {
             <Link href="/desaparecidos/1">
               <ImageWithFallback
                 src={person.main_photo}
+                fallbackSrc="/icons8-pessoa-do-sexo-masculino-100.png"
                 alt={`Photo of ${person.name}`}
                 fill
                 className="rounded-5"

@@ -80,7 +80,7 @@ function LocalizacaoNavBar({ selectedPeople }) {
             fontes. Para contribuir, entre em contato por e-mail.
           </p>
           <div>
-            <Link href="/desaparecidos" passHref>
+            <Link href="/desaparecidos/1" passHref>
               <button className="btn btn-light btn-lg mt-3 shadow">
                 Buscar Desaparecidos
               </button>

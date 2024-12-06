@@ -273,6 +273,15 @@ export async function getServerSideProps(context) {
   const page = Number(context.params.page) || 1;
   const { name, city, state } = context.query;
 
+  if (!context.params.page || context.params.page === '0') {
+    return {
+      redirect: {
+        destination: '/desaparecidos/1',
+        permanent: false,
+      },
+    };
+  }
+
   const queryParams = new URLSearchParams({
     page: page.toString(),
     limit: "33",
@@ -286,7 +295,7 @@ export async function getServerSideProps(context) {
     `http://${
       process.env.NEXT_PUBLIC_BASE_URL
         ? process.env.NEXT_PUBLIC_BASE_URL
-        : "desaparecidos2.vercel.app"
+        : "desaparecidos.vercel.app"
     }/api/desaparecidos?${queryParams.toString()}`
   );
 

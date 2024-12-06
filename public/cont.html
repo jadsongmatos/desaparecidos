@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .counter {
+            font-size: 48px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="counter">
+        <p id="contador">66259.00000</p>
+    </div>
+
+    <script>
+        // Valor inicial (66259 representa 3:26 do dia 6/12/2024)
+        let total = 66259.00000; // Inicialização com casas decimais
+        const incremento = 217.00000; // Mantendo o incremento como número decimal
+        const dataInicial = new Date(2024, 11, 6, 3, 26, 0); // 6 de dezembro de 2024 às 03:26
+        const intervalo24h = 24 * 60 * 60 * 1000; // 24 horas em milissegundos
+
+        // Função para atualizar o contador
+        function atualizarContador() {
+            // Calcula a diferença de tempo desde a data inicial
+            let tempoPassado = Date.now() - dataInicial.getTime();
+
+            // Calcula quantos incrementos de 24 horas se passaram
+            let incrementosPassados = tempoPassado / intervalo24h; // Não arredondar, usar valor contínuo
+
+            // Calcula o novo total, considerando o incremento com casas decimais
+            let novoTotal = total + (incrementosPassados * incremento);
+
+            // Atualiza o contador na tela com 5 casas decimais
+            document.getElementById('contador').textContent = novoTotal.toFixed(5);
+
+            // Atualiza a cada 100 milissegundos
+            setTimeout(atualizarContador, 300);
+        }
+
+        // Inicia o contador
+        atualizarContador();
+    </script>
+</body>
+</html>
