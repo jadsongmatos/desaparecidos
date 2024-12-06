@@ -4,6 +4,8 @@ export default function Document() {
   return (
     <Html lang="pt">
       <Head>
+        <meta name="description" content="Plataforma para buscar e encontrar informações sobre pessoas desaparecidas no Brasil. Sua ajuda pode fazer a diferença." />
+        <meta name="keywords" content="desaparecidos, busca de pessoas, encontrar pessoas, Brasil, ajuda" />
         <meta name="viewport" content="viewport-fit=cover" />
         <meta name="description" content="Desaparecidos" />
         <link rel="icon" href="/favicon.ico" />

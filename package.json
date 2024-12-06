@@ -36,6 +36,7 @@
     "react-paginate": "^8.2.0",
     "react-select": "5.8.0",
     "react-window": "1.8.10",
+    "swiper": "^11.1.15",
     "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
