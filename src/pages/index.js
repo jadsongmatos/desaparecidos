@@ -229,7 +229,7 @@ function LocalizacaoNavBar({ selectedPeople }) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/aoi/feed.rss" className="text-white">
+                  <Link href="/api/feed" className="text-white">
                     Feed RSS
                   </Link>
                 </li>

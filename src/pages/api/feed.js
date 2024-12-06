@@ -8,11 +8,9 @@ const url = `http://${
 
 export default async function handler(req, res) {
   try {
-    // Convertendo os parâmetros para inteiros
-    const page = parseInt(req.query.pag, 10);
+    const page = parseInt(req.query.pag || 1, 10);
     const limit = 6;
 
-    // Validação dos parâmetros
     if (isNaN(page) || isNaN(limit) || page < 1 || limit < 1) {
       return res.status(400).json({
         error:
@@ -20,13 +18,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // Busca dados da API com base na página
     const response = await fetch(
       `${url}/api/desaparecidos?page=${page}&limit=${limit}`
     );
     let data = await response.json();
 
-    // Crie o feed
     const feed = new Feed({
       title: "Desaparecidos",
       description: "Lista de pessoas desaparecidas",
@@ -38,7 +34,6 @@ export default async function handler(req, res) {
       generator: "Next.js + feed",
     });
 
-    // Adicione itens ao feed
     data.data.forEach((item) => {
       const uf = item.location_history?.[0]?.location?.uf || "Estado não informado";
       const city = item.location_history?.[0]?.location?.city || "Cidade não informada";
@@ -52,9 +47,8 @@ export default async function handler(req, res) {
             day: "numeric",
           })
         : "Última atualização não informada";
-    
+
       const birthday = item.birthday ? new Date(item.birthday) : null;
-    
       const birthdayFormatted = birthday
         ? birthday.toLocaleDateString("pt-BR", {
             year: "numeric",
@@ -62,7 +56,7 @@ export default async function handler(req, res) {
             day: "numeric",
           })
         : "Data de nascimento não informada";
-    
+
       const currentDate = new Date();
       let age = "Idade não informada";
       if (birthday) {
@@ -77,19 +71,18 @@ export default async function handler(req, res) {
           age = ageDiff;
         }
       }
-    
+
       const visitedAt = item.location_history?.[0]?.visited_at
         ? new Date(item.location_history[0].visited_at)
         : null;
-    
+
       let timeMissing = "Data de desaparecimento não informada";
       if (visitedAt) {
         const timeDiff = currentDate - visitedAt;
         const daysMissing = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
         timeMissing = `${daysMissing} dias`;
       }
-    
-      // Adiciona o histórico de localização
+
       let locationHistoryDescription = "";
       item.location_history?.forEach((loc, index) => {
         const location = loc.location || {};
@@ -100,10 +93,10 @@ export default async function handler(req, res) {
               day: "numeric",
             })
           : "Data de visitação não informada";
-    
+
         locationHistoryDescription += `\nLocalização ${index + 1}: ${location.uf || "Estado não informado"} ${location.city || "Cidade não informada"} ${location.neighborhood || "Bairro não informado"} - Visitação: ${locationDate}`;
       });
-    
+
       feed.addItem({
         title: item.name,
         id: item.id,
@@ -116,33 +109,32 @@ export default async function handler(req, res) {
         Etnia: ${nationality}.
         Nascimento: ${birthdayFormatted}.
         Última atualização: ${updatedAt}.
-        Histórico de Localizações: ${locationHistoryDescription}.
-        `,
+        Histórico de Localizações: ${locationHistoryDescription}.`,
         date: visitedAt || currentDate,
         image: item.main_photo,
       });
-    });    
+    });
 
     feed.addCategory("Desaparecidos");
 
     // Adicionar links de navegação (próxima página e página anterior)
     const totalPages = Math.ceil(data.meta.totalPages / limit);
+    feed.links = [];
 
     if (page > 1) {
-      feed.addLink({
+      feed.links.push({
         rel: "previous",
         href: `${url}/api/feed?page=${page - 1}`,
       });
     }
 
     if (page < totalPages) {
-      feed.addLink({
+      feed.links.push({
         rel: "next",
         href: `${url}/api/feed?page=${page + 1}`,
       });
     }
 
-    // Determine o formato do feed baseado no cabeçalho Accept
     const acceptHeader = req.headers.accept;
 
     if (acceptHeader.includes("application/atom+xml")) {
@@ -152,7 +144,6 @@ export default async function handler(req, res) {
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.write(feed.json1());
     } else {
-      // Padrão: RSS
       res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
       res.write(feed.rss2());
     }
