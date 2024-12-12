@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       copyright: "CC BY-SA",
       updated: new Date(),
       generator: "Next.js + feed",
+      feed: `${url}/api/feed?page=${page}`,
     });
 
     data.data.forEach((item) => {
@@ -101,6 +102,12 @@ export default async function handler(req, res) {
         } - Visitação: ${locationDate}`;
       });
 
+      const categories = [
+        { name: uf },
+        { name: city },
+        { name: neighborhood },
+      ];
+
       feed.addItem({
         title: item.name,
         id: item.id,
@@ -114,8 +121,11 @@ export default async function handler(req, res) {
         Nascimento: ${birthdayFormatted}.
         Última atualização: ${updatedAt}.
         Histórico de Localizações: ${locationHistoryDescription}.`,
-        date: visitedAt || currentDate,
+        date: new Date(item.updated_at),
+        published: visitedAt || currentDate,
         image: item.main_photo,
+        guid: item.id,
+        category: categories,
       });
     });
 
