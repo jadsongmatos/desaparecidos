@@ -32,6 +32,8 @@ export default async function handler(req, res) {
       copyright: "CC BY-SA",
       updated: new Date(),
       generator: "Next.js + feed",
+      // Adiciona o link "self" para indicar a URL atual do feed
+      feed: `${url}/api/feed?page=${page}`,
     });
 
     data.data.forEach((item) => {
@@ -100,7 +102,7 @@ export default async function handler(req, res) {
       feed.addItem({
         title: item.name,
         id: item.id,
-        link: `${url}/desaparecidos/1?name=${item.name}`,
+        link: `${url}/desaparecidos/1?name=${encodeURIComponent(item.name)}`,
         description: `Nome: ${item.name}.
         Idade: ${age} anos.
         Desaparecido há: ${timeMissing}.
@@ -117,14 +119,20 @@ export default async function handler(req, res) {
 
     feed.addCategory("Desaparecidos");
 
-    // Adicionar links de navegação (próxima página e página anterior)
-    const totalPages = Math.ceil(data.meta.totalPages / limit);
-    feed.links = [];
+    // Implementação da paginação conforme RFC 5005
+    const totalPages = Math.ceil(data.meta.total / limit); // Assumindo que a API retorna 'total' de itens
+    feed.links = [
+      { rel: "self", href: `${url}/api/feed?page=${page}` },
+    ];
 
     if (page > 1) {
       feed.links.push({
         rel: "previous",
         href: `${url}/api/feed?page=${page - 1}`,
+      });
+      feed.links.push({
+        rel: "first",
+        href: `${url}/api/feed?page=1`,
       });
     }
 
@@ -133,9 +141,13 @@ export default async function handler(req, res) {
         rel: "next",
         href: `${url}/api/feed?page=${page + 1}`,
       });
+      feed.links.push({
+        rel: "last",
+        href: `${url}/api/feed?page=${totalPages}`,
+      });
     }
 
-    const acceptHeader = req.headers.accept;
+    const acceptHeader = req.headers.accept || "";
 
     if (acceptHeader.includes("application/atom+xml")) {
       res.setHeader("Content-Type", "application/atom+xml; charset=utf-8");
