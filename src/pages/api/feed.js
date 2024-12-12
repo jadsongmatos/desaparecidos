@@ -23,6 +23,22 @@ export default async function handler(req, res) {
     );
     let data = await response.json();
 
+    // Verifique a estrutura de data.meta
+    console.log('Meta:', data.meta);
+
+    let totalPages;
+
+    if (data.meta.totalPages) {
+      totalPages = data.meta.totalPages;
+    } else if (data.meta.total) {
+      totalPages = Math.ceil(data.meta.total / limit);
+    } else {
+      console.error("A resposta da API não contém 'totalPages' ou 'total'.");
+      return res.status(500).json({
+        message: "Erro ao obter informações de paginação da API.",
+      });
+    }
+
     const feed = new Feed({
       title: "Desaparecidos",
       description: "Lista de pessoas desaparecidas",
@@ -33,7 +49,7 @@ export default async function handler(req, res) {
       updated: new Date(),
       generator: "Next.js + feed",
       // Adiciona o link "self" para indicar a URL atual do feed
-      feed: `${url}/api/feed?page=${page}`,
+      // Remova a propriedade 'feed' se não for suportada pelo pacote 'feed'
     });
 
     data.data.forEach((item) => {
@@ -96,7 +112,11 @@ export default async function handler(req, res) {
             })
           : "Data de visitação não informada";
 
-        locationHistoryDescription += `\nLocalização ${index + 1}: ${location.uf || "Estado não informado"} ${location.city || "Cidade não informada"} ${location.neighborhood || "Bairro não informado"} - Visitação: ${locationDate}`;
+        locationHistoryDescription += `\nLocalização ${index + 1}: ${
+          location.uf || "Estado não informado"
+        } ${location.city || "Cidade não informada"} ${
+          location.neighborhood || "Bairro não informado"
+        } - Visitação: ${locationDate}`;
       });
 
       feed.addItem({
@@ -104,14 +124,14 @@ export default async function handler(req, res) {
         id: item.id,
         link: `${url}/desaparecidos/1?name=${encodeURIComponent(item.name)}`,
         description: `Nome: ${item.name}.
-        Idade: ${age} anos.
-        Desaparecido há: ${timeMissing}.
-        Última localização conhecida: ${uf} ${city} ${neighborhood}.
-        Sexo: ${sex}.
-        Etnia: ${nationality}.
-        Nascimento: ${birthdayFormatted}.
-        Última atualização: ${updatedAt}.
-        Histórico de Localizações: ${locationHistoryDescription}.`,
+Idade: ${age} anos.
+Desaparecido há: ${timeMissing}.
+Última localização conhecida: ${uf} ${city} ${neighborhood}.
+Sexo: ${sex}.
+Etnia: ${nationality}.
+Nascimento: ${birthdayFormatted}.
+Última atualização: ${updatedAt}.
+Histórico de Localizações: ${locationHistoryDescription}.`,
         date: visitedAt || currentDate,
         image: item.main_photo,
       });
@@ -120,9 +140,10 @@ export default async function handler(req, res) {
     feed.addCategory("Desaparecidos");
 
     // Implementação da paginação conforme RFC 5005
-    const totalPages = Math.ceil(data.meta.total / limit); // Assumindo que a API retorna 'total' de itens
     feed.links = [
       { rel: "self", href: `${url}/api/feed?page=${page}` },
+      { rel: "first", href: `${url}/api/feed?page=1` },
+      { rel: "last", href: `${url}/api/feed?page=${totalPages}` },
     ];
 
     if (page > 1) {
@@ -130,20 +151,12 @@ export default async function handler(req, res) {
         rel: "previous",
         href: `${url}/api/feed?page=${page - 1}`,
       });
-      feed.links.push({
-        rel: "first",
-        href: `${url}/api/feed?page=1`,
-      });
     }
 
     if (page < totalPages) {
       feed.links.push({
         rel: "next",
         href: `${url}/api/feed?page=${page + 1}`,
-      });
-      feed.links.push({
-        rel: "last",
-        href: `${url}/api/feed?page=${totalPages}`,
       });
     }
 
