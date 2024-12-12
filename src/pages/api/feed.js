@@ -23,22 +23,6 @@ export default async function handler(req, res) {
     );
     let data = await response.json();
 
-    // Verifique a estrutura de data.meta
-    console.log('Meta:', data.meta);
-
-    let totalPages;
-
-    if (data.meta.totalPages) {
-      totalPages = data.meta.totalPages;
-    } else if (data.meta.total) {
-      totalPages = Math.ceil(data.meta.total / limit);
-    } else {
-      console.error("A resposta da API não contém 'totalPages' ou 'total'.");
-      return res.status(500).json({
-        message: "Erro ao obter informações de paginação da API.",
-      });
-    }
-
     const feed = new Feed({
       title: "Desaparecidos",
       description: "Lista de pessoas desaparecidas",
@@ -48,8 +32,6 @@ export default async function handler(req, res) {
       copyright: "CC BY-SA",
       updated: new Date(),
       generator: "Next.js + feed",
-      // Adiciona o link "self" para indicar a URL atual do feed
-      // Remova a propriedade 'feed' se não for suportada pelo pacote 'feed'
     });
 
     data.data.forEach((item) => {
@@ -124,14 +106,14 @@ export default async function handler(req, res) {
         id: item.id,
         link: `${url}/desaparecidos/1?name=${encodeURIComponent(item.name)}`,
         description: `Nome: ${item.name}.
-Idade: ${age} anos.
-Desaparecido há: ${timeMissing}.
-Última localização conhecida: ${uf} ${city} ${neighborhood}.
-Sexo: ${sex}.
-Etnia: ${nationality}.
-Nascimento: ${birthdayFormatted}.
-Última atualização: ${updatedAt}.
-Histórico de Localizações: ${locationHistoryDescription}.`,
+        Idade: ${age} anos.
+        Desaparecido há: ${timeMissing}.
+        Última localização conhecida: ${uf} ${city} ${neighborhood}.
+        Sexo: ${sex}.
+        Etnia: ${nationality}.
+        Nascimento: ${birthdayFormatted}.
+        Última atualização: ${updatedAt}.
+        Histórico de Localizações: ${locationHistoryDescription}.`,
         date: visitedAt || currentDate,
         image: item.main_photo,
       });
@@ -139,38 +121,69 @@ Histórico de Localizações: ${locationHistoryDescription}.`,
 
     feed.addCategory("Desaparecidos");
 
-    // Implementação da paginação conforme RFC 5005
-    feed.links = [
-      { rel: "self", href: `${url}/api/feed?page=${page}` },
-      { rel: "first", href: `${url}/api/feed?page=1` },
-      { rel: "last", href: `${url}/api/feed?page=${totalPages}` },
-    ];
+    // Calcular total de páginas
+    const totalPages = Math.ceil(data.meta.totalPages / limit);
+    feed.links = []; // Limpar links existentes
+
+    // URLs para a página anterior e próxima
+    const links = [];
 
     if (page > 1) {
-      feed.links.push({
-        rel: "previous",
-        href: `${url}/api/feed?page=${page - 1}`,
-      });
+      const prevPageURL = `${url}/api/feed?page=${page - 1}`;
+      links.push(`<${prevPageURL}>; rel="previous"`);
     }
 
     if (page < totalPages) {
-      feed.links.push({
-        rel: "next",
-        href: `${url}/api/feed?page=${page + 1}`,
-      });
+      const nextPageURL = `${url}/api/feed?page=${page + 1}`;
+      links.push(`<${nextPageURL}>; rel="next"`);
+    }
+
+    // Definir o cabeçalho Link conforme RFC 5005
+    if (links.length > 0) {
+      res.setHeader("Link", links.join(", "));
     }
 
     const acceptHeader = req.headers.accept || "";
 
     if (acceptHeader.includes("application/atom+xml")) {
+      let atom = feed.atom1();
+      // Adicionar links de navegação dentro do feed Atom
+      if (links.length > 0) {
+        const linkTags = links
+          .map((link) => `<link href="${link.match(/<(.*?)>; rel="(.*?)"/)[1]}" rel="${link.match(/rel="(.*?)"/)[1]}" />`)
+          .join("\n");
+        // Inserir antes da tag </feed>
+        atom = atom.replace("</feed>", `${linkTags}\n</feed>`);
+      }
       res.setHeader("Content-Type", "application/atom+xml; charset=utf-8");
-      res.write(feed.atom1());
+      res.write(atom);
     } else if (acceptHeader.includes("application/json")) {
+      let json = feed.json1();
+      // RFC 5005 is not standard for JSON feeds, but you can include pagination links in a custom field
+      if (links.length > 0) {
+        const jsonData = JSON.parse(json);
+        jsonData.links = jsonData.links || [];
+        data.links.forEach((link) => jsonData.links.push(link));
+        json = JSON.stringify(jsonData, null, 2);
+      }
       res.setHeader("Content-Type", "application/json; charset=utf-8");
-      res.write(feed.json1());
+      res.write(json);
     } else {
+      let rss = feed.rss2();
+      // RSS 2.0 doesn't have a standard way for pagination, but you can include custom namespaces or elements
+      // Here, we'll add pagination links as custom elements
+      if (links.length > 0) {
+        const pagination = links
+          .map((link) => `<atom:link href="${link.match(/<(.*?)>; rel="(.*?)"/)[1]}" rel="${link.match(/rel="(.*?)"/)[1]}" />`)
+          .join("\n");
+        // Insert after <channel> opening tag
+        rss = rss.replace(
+          "<channel>",
+          `<channel>\n  ${pagination}`
+        );
+      }
       res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
-      res.write(feed.rss2());
+      res.write(rss);
     }
 
     res.end();
