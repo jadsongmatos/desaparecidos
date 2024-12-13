@@ -27,6 +27,7 @@ export default function Document() {
         <meta name="twitter:description" content="Desaparecidos" />
         <meta name="twitter:image" content="/favicon.ico" />
         <meta name="image" content="/favicon.ico" />
+        <meta name="google-site-verification" content="K6n_i0D944OJIJwD-M5iQ-jy3oAKFS5aTTL3uJOpy9I" />
         <meta name="algolia-site-verification"  content="30E5665362A50A80" />
       </Head>
       <body>
