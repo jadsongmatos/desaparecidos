@@ -1,259 +1,170 @@
-# Desaparecidos
+# Projeto Integrador: Casos de Pessoas Desaparecidas no Brasil
 
-## Pesquisa
+Este projeto desenvolvido em **Next.js** tem como objetivo agregar, armazenar e exibir informações sobre pessoas desaparecidas no Brasil. Utilizando o **Prisma** como ORM para gerenciar um banco de dados **PostgreSQL**, o projeto integra-se com APIs externas para buscar dados atualizados e fornece uma interface frontend intuitiva para navegar, filtrar e visualizar detalhes sobre esses indivíduos.
 
-1. **Diagnóstico do Problema:**
+## Visão Geral
 
-   - Identificação da gravidade do problema de desaparecimento no Brasil, com mais de 100 mil casos anuais.
-   - Análise das causas e fatores relacionados, como conflitos familiares, questões criminais, saúde mental, entre outros.
+O projeto visa criar uma plataforma centralizada para facilitar a busca e o acompanhamento de casos de pessoas desaparecidas no Brasil. Através de uma interface amigável e de um backend robusto, o sistema permite:
 
-2. **Pesquisa Preliminar:**
+- **Agregação de Dados:** Coleta informações de fontes oficiais e APIs externas.
+- **Armazenamento Seguro:** Gerenciamento eficiente de dados utilizando PostgreSQL e Prisma.
+- **Exibição Informativa:** Interface frontend para visualização detalhada e filtragem de casos.
+- **Atualizações Automatizadas:** Integração com feeds RSS/Atom/JSON para manter os dados sempre atualizados.
 
-   - Coleta de dados iniciais sobre detetives e suas ferramentas de trabalho.
-   - Levantamento de fontes de dados públicas e governamentais sobre desaparecidos.
+## Estrutura do Projeto
 
-3. **Tarefas e Recursos:**
+- **`schema.prisma`**: Define os modelos de banco de dados (`Person`, `Location`, `LocationHistory` e `Image`) com seus respectivos campos e relacionamentos.
 
-   - Planejamento de tarefas específicas para auxiliar na solução do problema, como:
-     - Busca de históricos de casos resolvidos para análise.
-     - Desenvolvimento de formulários de cadastro de desaparecidos.
-     - Integração de sistemas RSS para notificações automatizadas.
-   - Disponibilização de links e fontes úteis, como bancos de dados e modelos de autorização.
+- **`next.config.mjs`**: Configurações do Next.js, incluindo domínios permitidos para carregamento de imagens e redirecionamentos.
 
-4. **Estruturação de Dados:**
+- **`package.json`**: Gerencia as dependências e scripts do projeto. Principais dependências incluem `prisma`, `next`, `react`, `axios`, `feed`, entre outras bibliotecas de UI e utilitárias.
 
-   - **Causas do desaparecimento:** Classificação detalhada com estatísticas por ano.
-   - **Perfil demográfico:** Dados como faixas etárias, estaturas, pesos e preferências psicossociais.
-   - **Perguntas-chave:** Lista de perguntas relevantes para investigações sobre desaparecidos, cobrindo aspectos físicos, sociais e psicológicos.
+- **`next-sitemap.config.js`**: Configurações para geração de sitemaps e `robots.txt`, melhorando o SEO do site.
 
-5. **Soluções e Funcionalidades Propostas:**
+- **Diretórios Principais:**
+  - `/api/desaparecidos`: Rota de API principal para buscar e gerenciar dados de pessoas desaparecidas.
+  - `/api/feed`: Gera feeds RSS/Atom/JSON para sindicação de dados.
+  - `/pages/desaparecidos/[page].jsx`: Página dinâmica que exibe uma lista paginada de pessoas desaparecidas com funcionalidades de filtro.
+  - `/pages/index.js`: Página inicial com navegação, seção introdutória e slider interativo.
+  - `/components/`: Componentes reutilizáveis como `SwiperComponent` e `ImageWithFallback`.
 
-   - Ferramentas tecnológicas, como reconhecimento facial e simulação de envelhecimento.
-   - Recursos para detetives, como plataformas de trabalho e sistemas de colaboração.
-   - Soluções para aumentar a visibilidade de casos, como fóruns e integração com redes sociais.
+## Modelos de Dados e Banco de Dados
 
-6. **Fontes de Financiamento:**
-   - Modelos de financiamento, como anúncios, doações e assinaturas para profissionais.
-   - Engajamento de comunidades religiosas e sociais para apoio.
+### Person
 
-## Análise de casos de pessoas desaparecidas
+Representa um indivíduo desaparecido.
 
-### 1. **Estruturação de Dados**
+- `id`: Identificador único.
+- `name`: Nome completo.
+- `birthday`: Data de nascimento.
+- `gender`: Gênero (booleano).
+- `nationality`: Nacionalidade.
+- `tattoo`: Informações sobre tatuagens.
+- `main_photo`: URL da foto principal.
+- `others`: Outras informações relevantes.
+- **Relacionamentos:**
+  - `locationHistory`: Histórico de localizações.
+  - `images`: Múltiplas imagens relacionadas.
 
-- As informações foram organizadas em forma de tabela.
-- Cada linha representar uma característica ou variável associada à pessoa desaparecida.
-- Cada coluna representar uma pessoa desaparecida.
+### Location
 
-### 2. **Atributos Analisados**
+Armazena dados geográficos.
 
-- A tabela cobre uma ampla gama de aspectos:
-  - **Características físicas**: IMC, altura, peso, idade.
-  - **Comportamentais**: Se a pessoa fugiu, usava transporte público, estava empregada, entre outros.
-  - **Circunstanciais**: Relacionamentos, viagens, posse de documentos, intenção de retornar, etc.
-  - **Aspectos sociais e emocionais**: Felicidade, satisfação com a vida, esperança.
-  - **Fatores ligados ao desaparecimento**: Se foi sequestrada, conflitos de guarda, ou relações familiares.
+- `id`: Identificador único.
+- `city`: Cidade.
+- `uf`: Unidade federativa (estado).
+- `country`: País.
+- `neighborhood`: Bairro.
 
-### 3. **Representação Numérica**
+### LocationHistory
 
-- Muitas variáveis foram codificadas numericamente:
-  - **Binárias**: Sim/Não (1 ou -1, 0 ou -1).
-  - **Escala parcial**: Por exemplo, 0,5, -0,5 para indicar um grau de incerteza.
-  - **Contínuas**: Para dados como idade, IMC, TMB, e gordura corporal.
+Rastreamento de locais onde a pessoa foi vista pela última vez.
 
-### 4. **Possíveis Objetivos**
+- `id`: Identificador único.
+- `personId`: Relacionamento com `Person`.
+- `locationId`: Relacionamento com `Location`.
+- `date`: Data da última localização.
 
-- **Classificação ou Predição**:
-  - Prever se uma pessoa foi encontrada, viveu ou não, ou quanto tempo levou para ser localizada.
-  - Identificar padrões em casos de desaparecimento.
-- **Análise Descritiva**:
-  - Explorar características comuns ou fatores associados ao desaparecimento.
-- **Identificação de Riscos**:
-  - Compreender fatores de risco baseados nas características descritas.
-- **Machine Learning/Modelos Estatísticos**:
-  - Os dados poderiam ser usados em algoritmos para treinar modelos que identificam ou agrupam padrões similares em casos de desaparecimento.
+### Image
 
----
+Contém múltiplas URLs de imagens relacionadas a uma pessoa específica.
 
-Implementado um pipeline de **ETL (Extração, Transformação e Carregamento)** para coletar dados sobre pessoas desaparecidas do sistema **NamUs** e armazená-los em um banco de dados **DuckDB**.
+- `id`: Identificador único.
+- `personId`: Relacionamento com `Person`.
+- `url`: URL da imagem.
 
-1. **Extrair** dados sobre pessoas desaparecidas da API do NamUs, utilizando requisições paginadas para obter todos os registros disponíveis.
-2. **Transformar** os dados, realizando requisições detalhadas para cada caso e tratando campos opcionais e complexos.
-3. **Carregar** os dados transformados em um banco de dados DuckDB local, facilitando análises futuras e garantindo persistência dos dados coletados.
+## Funcionalidades do Backend
 
----
+### `/api/desaparecidos`
 
-## Site
+**Descrição:**
+Rota de API principal para buscar pessoas desaparecidas. Suporta paginação e filtragem por nome, cidade e estado. Integra-se com fontes externas caso o banco de dados local não possua registros suficientes.
 
-### Backend
+**Parâmetros:**
 
-- Cria e gerencia um esquema de banco de dados relacional para armazenar informações de pessoas desaparecidas (incluindo onde foram vistas, imagens, etc.).
-- Fornece um endpoint que:
-  - Filtra e pagina resultados existentes no banco com base em parâmetros da requisição.
-  - Caso os dados locais se esgotem, busca novos registros em serviços externos (do RS e SC).
-  - Parseia e processa esses dados externos, enriquecendo-os com previsões de nacionalidade e gênero.
-  - Armazena as novas informações no banco se não forem duplicadas.
-  - Retorna os dados no formato JSON ao cliente.
+- `page` (padrão: 1): Número da página.
+- `limit` (padrão: 6): Número de registros por página.
+- `name`: Filtro por nome.
+- `city`: Filtro por cidade.
+- `state`: Filtro por estado.
 
-### Frontend
+**Lógica:**
 
-- **Busca dinâmica de dados**:
-  - Estados e cidades são carregados dinamicamente usando a API pública do IBGE.
-- **Filtros de pesquisa**:
-  - Nome, estado e cidade são usados para refinar os resultados.
-- **Paginação**:
-  - Os resultados são divididos em páginas e o usuário pode navegar entre elas.
-- **Integração com API**:
-  - Dados de desaparecidos são buscados de uma API personalizada.
-- **Renderização condicional**:
-  - Informações como histórico de localizações são exibidas apenas se estiverem disponíveis.
-- **Fallbacks de imagem**:
-  - Usa um fallback para imagens ausentes ou que falhem ao carregar.
+1. **Consulta Local:**
+   - Utiliza consultas do Prisma para buscar resultados paginados e filtrados na tabela `Person`.
 
----
+2. **Busca Externa:**
+   - Se os filtros não forem fornecidos e o banco de dados local não tiver registros suficientes, busca novos dados nas seguintes fontes:
+     - `www.pc.rs.gov.br` (Polícia do Rio Grande do Sul)
+     - `devs.pc.sc.gov.br` (Polícia de Santa Catarina)
+   - **Processamento dos Dados:**
+     - RS: Análise de HTML usando `cheerio`.
+     - SC: Análise de JSON.
+   - **Enriquecimento:**
+     - Utiliza as APIs `genderize.io` e `nationalize.io` para adicionar informações de gênero e nacionalidade.
+   - **Armazenamento:**
+     - Salva novos registros no banco de dados, evitando duplicatas através da função `checkIfPersonExists()` que utiliza similaridade fuzzy com a extensão `pg_trgm` do PostgreSQL.
 
-Aqui está uma estrutura de apresentação com base nas informações fornecidas, organizada em slides:
+3. **Resposta:**
+   - Retorna um JSON com `data` (lista de pessoas desaparecidas) e `meta` (informações de paginação).
 
----
+### `/api/feed`
 
-# Projeto Integrador - Pesquisa e Análise de Casos de Pessoas Desaparecidas no Brasil
+**Descrição:**
+Gera um feed RSS/Atom/JSON com dados de pessoas desaparecidas para sindicação.
 
-### Diagnóstico do Problema
+**Funcionalidade:**
 
-#### A gravidade do desaparecimento no Brasil:
+- Busca dados de `/api/desaparecidos`.
+- Formata os dados em um feed utilizando a biblioteca `feed`.
+- Suporta múltiplos formatos (RSS, Atom, JSON) com base nos cabeçalhos `Accept`.
 
-- Mais de 100 mil casos anuais de desaparecimentos.
-- Causas e fatores contribuintes:
-  - **Conflitos familiares**
-  - **Questões criminais**
-  - **Problemas de saúde mental**
-  - **Outros fatores sociais**
+## Funcionalidades do Frontend
 
----
+### Página `/desaparecidos/[page].jsx`
 
-### Pesquisa Preliminar
+**Descrição:**
+Página dinâmica que exibe uma lista paginada de pessoas desaparecidas.
 
-#### Coleta de Dados sobre Desaparecidos e Ferramentas de Trabalho
+**Funcionalidades:**
 
-- **Detetives e ferramentas de trabalho**: Importância das ferramentas tecnológicas no auxílio à busca.
-- **Fontes de dados**: Acesso a dados públicos e governamentais sobre desaparecimentos.
+- **Listagem Paginada:**
+  - Exibe registros com controles de paginação para navegar entre páginas.
 
----
+- **Filtros Dinâmicos:**
+  - Integração com a API pública do IBGE para carregar estados e cidades dinamicamente.
+  - Permite filtragem por nome, cidade e estado.
 
-### Tarefas e Recursos
+- **Detalhes da Pessoa:**
+  - Exibe informações como data de nascimento, nacionalidade, gênero, tatuagens e histórico de localizações.
 
-#### Planejamento de Ações para Solução do Problema:
+### Página `/index.js`
 
-- **Busca de históricos de casos resolvidos**.
-- **Desenvolvimento de formulários de cadastro**.
-- **Integração com sistemas RSS para notificações automatizadas**.
-- **Fontes úteis**:
-  - Bancos de dados públicos.
-  - Modelos de autorização.
+**Descrição:**
+Página inicial do site com navegação e informações introdutórias.
 
----
+**Componentes:**
 
-### Estruturação de Dados
+- **Barra de Navegação:**
+  - Links para diferentes seções do site.
 
-#### Organização das Informações dos Casos de Desaparecimento
+- **Seção Hero:**
+  - Introdução ao propósito do site.
 
-- **Características físicas**: IMC, altura, peso, idade.
-- **Comportamentais**: Se a pessoa fugiu, usava transporte público, etc.
-- **Circunstanciais**: Relacionamentos, viagens, posse de documentos.
-- **Aspectos sociais e emocionais**: Felicidade, esperança, satisfação com a vida.
-- **Fatores do desaparecimento**: Se foi sequestrado, conflitos familiares, etc.
+- **Fundo Interativo:**
+  - Slider (`SwiperComponent`) exibindo pessoas desaparecidas selecionadas.
 
----
+- **Informações Adicionais:**
+  - Explicação sobre o funcionamento do site.
+  - Incentivo para contribuições por e-mail.
+  - Links para o repositório no GitHub para fomentar contribuições de código.
 
-### Representação Numérica
+## Contato
 
-#### Codificação de Variáveis
+Para mais informações, dúvidas ou sugestões, sinta-se à vontade para entrar em contato:
 
-- **Variáveis binárias**: Sim/Não (1 ou 0).
-- **Escalas parciais**: Grau de incerteza (0,5, -0,5).
-- **Dados contínuos**: Idade, IMC, TMB, gordura corporal.
+- **Email:** [jadson.g-matos@outlook.com](mailto:jadson.g-matos@outlook.com)
 
 ---
 
-### Objetivos da Análise
-
-#### Objetivos Principais da Pesquisa:
-
-- **Classificação ou Predição**:
-  - Prever a chance de localização ou sobrevivência.
-- **Análise Descritiva**:
-  - Identificar padrões e características comuns.
-- **Identificação de Riscos**:
-  - Identificar fatores de risco para desaparecimentos.
-- **Machine Learning/Modelos Estatísticos**:
-  - Uso de algoritmos para detectar padrões.
-
----
-
-### Pipeline de ETL
-
-#### Estratégia de Coleta e Armazenamento de Dados
-
-1. **Extração (E)**: Coleta de dados da API do NamUs com requisições paginadas.
-2. **Transformação (T)**: Processamento detalhado de cada caso, tratamento de campos complexos.
-3. **Carregamento (L)**: Armazenamento dos dados em banco DuckDB para futuras análises.
-
----
-
-### Backend do Sistema
-
-#### Arquitetura do Backend:
-
-- **Esquema de banco de dados relacional**: Armazenamento de informações sobre desaparecidos.
-- **Endpoints de API**:
-  - Filtragem e paginação de resultados.
-  - Requisições para buscar dados de estados e cidades.
-  - Enriquecimento de dados com previsões de nacionalidade e gênero.
-  - Armazenamento de novos dados (não duplicados).
-
----
-
-### Frontend do Sistema
-
-#### Funcionalidades do Frontend:
-
-- **Busca dinâmica de dados**:
-  - Carregamento de estados e cidades usando API do IBGE.
-- **Filtros de pesquisa**:
-  - Pesquisa por nome, estado e cidade.
-- **Paginação**:
-  - Navegação entre páginas de resultados.
-- **Integração com API**:
-  - Busca de dados de desaparecidos através de API personalizada.
-- **Renderização condicional**:
-  - Exibição de histórico de localizações se disponível.
-- **Fallbacks de imagem**:
-  - Imagens ausentes são substituídas por fallback.
-
----
-
-### Soluções Tecnológicas Propostas
-
-#### Tecnologia no Combate ao Desaparecimento:
-
-- **Reconhecimento facial**: Identificação de desaparecidos em imagens.
-- **Simulação de envelhecimento**: Ferramenta para prever como o desaparecido poderia parecer anos após o desaparecimento.
-- **Plataformas de trabalho para detetives**: Ferramentas colaborativas para melhorar a eficiência nas investigações.
-
----
-
-### Fontes de Financiamento
-
-#### Modelos de Financiamento e Engajamento Comunitário:
-
-- **Anúncios e Doações**: Fontes diretas para financiar a plataforma.
-- **Assinaturas**: Serviços pagos para profissionais de investigação.
-- **Apoio Comunitário**: Envolvimento de comunidades religiosas e sociais.
-
----
-
-### Conclusão
-
-#### Rumo a Soluções Eficazes para o Desaparecimento de Pessoas
-
-- **Integração de dados e tecnologias**: Importância de uma abordagem multifacetada para aumentar a eficácia das investigações.
-- **Colaboração social e comunitária**: Envolvimento das partes interessadas para ampliar o impacto das soluções propostas.
+Agradecemos sua colaboração e interesse em tornar este projeto uma ferramenta eficaz no combate ao desaparecimento de pessoas no Brasil. Juntos, podemos fazer a diferença!
